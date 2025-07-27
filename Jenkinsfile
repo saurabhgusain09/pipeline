@@ -16,4 +16,3 @@ pipeline {
             echo '❌ Code checkout failed. Please check the logs.'
         }
     }
-}
