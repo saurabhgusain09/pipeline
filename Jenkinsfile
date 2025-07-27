@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    }
+    
     stages {
         stage('Checkout Code') {
             steps {
@@ -16,3 +16,4 @@ pipeline {
             echo '❌ Code checkout failed. Please check the logs.'
         }
     }
+}
