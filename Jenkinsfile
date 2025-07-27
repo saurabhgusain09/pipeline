@@ -71,11 +71,24 @@ pipeline {
                 sh "${MAVEN_HOME}/bin/mvn -Dtest=FormUITest test -DfailIfNoTests=false"
             }
         }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                echo '📦 Pushing image to Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker tag superlab:${BUILD_NUMBER} <your-dockerhub-username>/superlab:${BUILD_NUMBER}
+                        docker push <your-dockerhub-username>/superlab:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo '✅ All stages passed successfully including Selenium test!'
+            echo '✅ All stages passed successfully and image pushed to Docker Hub!'
         }
         failure {
             echo '❌ Pipeline failed. Please check the logs.'
