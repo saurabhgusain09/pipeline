@@ -7,9 +7,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'my-private-repo-creds', branch: 'main', url: 'https://github.com/saurabhgusain09/superlab.git
-
-'
+                git credentialsId: 'my-private-repo-creds', branch: 'main', url:'https://github.com/saurabhgusain09/superlab.git'
             }
         }
         stage('Maven Build') {
