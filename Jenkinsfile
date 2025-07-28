@@ -26,8 +26,8 @@ pipeline {
                     echo '🔍 Running SonarCloud analysis (coverage fully disabled)...'
                     sh """
                         ${SONAR_SCANNER}/bin/sonar-scanner \
-                          -Dsonar.projectKey=sonartest0_sonarqubeproject \
-                          -Dsonar.organization=sonartest0 \
+                          -Dsonar.projectKey=sonartestorg0_sonarqubeproject \
+                          -Dsonar.organization=sonartestorg0 \
                           -Dsonar.sources=src/main/java \
                           -Dsonar.tests=src/test/java \
                           -Dsonar.java.binaries=target/classes \
