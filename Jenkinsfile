@@ -1,37 +1,61 @@
 pipeline {
     agent any
     environment {
-    MAVEN_HOME = tool 'MAVEN' // Use the name given in Global Tool Configuration
-}
-
-
-   
-
+        MAVEN_HOME = tool 'MAVEN'
+        SONAR_SCANNER = tool 'SonarScanner'
+    }
     stages {
-        stage('Stage 1 -Checkout code') {
+        stage('Checkout Code') {
             steps {
-                echo "🔁 Cloning Private GitHub Repository.."
                 git credentialsId: 'my-private-repo-creds', branch: 'main', url: 'https://github.com/saurabhgusain09/superlab.git'
-
             }
         }
-
-        stage('Stage 2 - Maven Build') {
+        stage('Maven Build') {
             steps {
-                echo "Building Project"
+                echo 'Building project'
                 sh "${MAVEN_HOME}/bin/mvn clean verify -Dtest=!FormUITest"
             }
         }
-
-        // ➕ Add more stages as needed
+        stage('SonarQube Code Quality Scan') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    echo '🔍 Running SonarCloud analysis (coverage disabled for now)...'
+                    sh """
+                        ${SONAR_SCANNER}/bin/sonar-scanner \
+                          -Dsonar.projectKey=sonartestorg02_sonarqubeproject \
+                          -Dsonar.organization=sonartestorg02 \
+                          -Dsonar.sources=src/main/java \
+                          -Dsonar.tests=src/test/java \
+                          -Dsonar.java.binaries=target/classes \
+                          -Dsonar.coverage.exclusions=**/*.java \
+                          -Dsonar.coverage.newCode.requiredCoverage=0 \
+                          -Dsonar.newCode.period=1 \
+                          -Dsonar.qualitygate.wait=true \
+                          -Dsonar.host.url=https://sonarcloud.io
+                    """
+                }
+            }
+        }
+        stage('Check Sonar Quality Gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "❌ Quality Gate failed: ${qg.status}"
+                        }
+                    }
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo "✅ Pipeline completed successfully!"
+            echo '✅ Phase 5 completed successfully! Code passed quality checks.'
         }
         failure {
-            echo "❌ Pipeline failed. Please check the logs."
+            echo '❌ Pipeline failed. Please review the logs or SonarQube report.'
         }
     }
 }
